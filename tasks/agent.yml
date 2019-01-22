@@ -1,0 +1,3 @@
+---
+- name: agent | Running Agent
+  mysql_dynamic_inventory_agent:
