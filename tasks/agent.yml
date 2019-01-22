@@ -1,3 +1,24 @@
 ---
+- name: agent | Installing python-pip
+  apt:
+    name: python-pip
+    state: present
+  become: true
+  register: result
+  until: result is successful
+
+- name: agent | Installing Python mysql-connector module
+  pip:
+    name: mysql-connector
+    state: present
+  become: true
+  register: result
+  until: result is successful
+
 - name: agent | Running Agent
   mysql_dynamic_inventory_agent:
+    ansible_host: "{{ ansible_default_ipv4['address'] }}"
+    ansible_hostname: "{{ inventory_hostname }}"
+    dbhost: 192.168.250.10
+    dbuser: ansible
+    dbpass: ansible

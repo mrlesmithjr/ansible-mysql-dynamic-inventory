@@ -5,7 +5,8 @@
 
 from ansible.module_utils.basic import AnsibleModule
 import mysql.connector
-from mysql.connector import Error
+# from mysql.connector import Error
+import socket
 
 ANSIBLE_METADATA = {
     'metadata_version': '1.1',
@@ -17,9 +18,13 @@ ANSIBLE_METADATA = {
 def run_module():
     # define available arguments/parameters a user can pass to the module
     module_args = dict(
+        ansible_host=dict(type='str', required=True),
+        ansible_hostname=dict(type='str', required=True),
         dbhost=dict(type='str', required=True),
+        dbname=dict(type='str', required=False, default='ansible'),
+        dbpass=dict(type='str', required=True, no_log=True),
         dbport=dict(type='str', required=False, default='3306'),
-        new=dict(type='bool', required=False, default=False)
+        dbuser=dict(type='str', required=True)
     )
 
     # seed the result dict in the object
@@ -39,7 +44,7 @@ def run_module():
     # supports check mode
     module = AnsibleModule(
         argument_spec=module_args,
-        supports_check_mode=True
+        supports_check_mode=False
     )
 
     # if the user is working with this module in only check mode we do not
@@ -48,21 +53,50 @@ def run_module():
     if module.check_mode:
         return result
 
+    connection = mysql.connector.connect(
+        host=module.params['dbhost'],
+        user=module.params['dbuser'],
+        passwd=module.params['dbuser'],
+        database=module.params['dbname'])
+    cursor = connection.cursor()
+    # hostname = socket.getfqdn()
+    # s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    # s.connect(("8.8.8.8", 80))
+    # ip_address = (s.getsockname()[0])
+    # s.close()
+    sql = "SELECT id FROM hosts WHERE name='{0}'".format(
+        module.params['ansible_hostname'])
+    cursor.execute(sql)
+    hostname_check = cursor.fetchone()
+    if hostname_check is None:
+        sql = "INSERT INTO hosts(name) VALUES('{0}')".format(
+            module.params['ansible_hostname'])
+        cursor.execute(sql)
+        result['changed'] = True
+    sql = ("REPLACE INTO "
+           "hostvars(name, value, hostid) "
+           "VALUES('ansible_host', '{0}', "
+           "(SELECT id FROM hosts WHERE name='{1}'))".format(module.params[
+               'ansible_host'], module.params['ansible_hostname']))
+    cursor.execute(sql)
+    connection.commit()
+    cursor.close()
+
     # manipulate or modify the state as needed (this is going to be the
     # part where your module will do what it needs to do)
-    result['original_message'] = module.params['name']
-    result['message'] = 'goodbye'
+    # result['original_message'] = module.params['name']
+    # result['message'] = 'goodbye'
 
     # use whatever logic you need to determine whether or not this module
     # made any modifications to your target
-    if module.params['new']:
-        result['changed'] = True
+    # if module.params['new']:
+    #     result['changed'] = True
 
     # during the execution of the module, if there is an exception or a
     # conditional state that effectively causes a failure, run
     # AnsibleModule.fail_json() to pass in the message and the result
-    if module.params['name'] == 'fail me':
-        module.fail_json(msg='You requested this to fail', **result)
+    # if module.params['name'] == 'fail me':
+    #     module.fail_json(msg='You requested this to fail', **result)
 
     # in the event of a successful module execution, you will want to
     # simple AnsibleModule.exit_json(), passing the key/value results

@@ -19,6 +19,9 @@ try:
 except Error as e:
     print "Error while connecting to MySQL", e
 
+# node = "node11"
+# add_host = ("INSERT INTO hosts (name) VALUES ('{0}')".format(node))
+# CURSOR.execute(add_host)
 GROUPS = dict()
 CURSOR.execute('SELECT id, name FROM groups;')
 for row in CURSOR.fetchall():
