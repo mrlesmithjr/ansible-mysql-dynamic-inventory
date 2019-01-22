@@ -6,19 +6,18 @@ import mysql.connector
 from mysql.connector import Error
 
 PARSER = argparse.ArgumentParser()
+PARSER.add_argument('--dbhost', default='192.168.250.10')
 PARSER.add_argument('--list', default=False, action='store_true')
 PARSER.add_argument('--host', default=None)
 ARGS = PARSER.parse_args()
 
 try:
     CONNECTION = mysql.connector.connect(
-        host='192.168.250.10', user='ansible', passwd='ansible',
+        host=ARGS.dbhost, user='ansible', passwd='ansible',
         database='ansible')
     CURSOR = CONNECTION.cursor()
 except Error as e:
     print "Error while connecting to MySQL", e
-
-INVENTORY = dict()
 
 GROUPS = dict()
 CURSOR.execute('SELECT id, name FROM groups;')
@@ -48,6 +47,20 @@ CURSOR.execute('SELECT hostid, groupid FROM hostgroups;')
 for row in CURSOR.fetchall():
     HOSTGROUPS[row[0]] = row[1]
 
+INVENTORY = dict()
+INVENTORY['all'] = dict()
+
+ALL_GROUPS = []
+ALL_GROUPS.append('ungrouped')
+for group_id, group_name in GROUPS.items():
+    ALL_GROUPS.append(group_name)
+INVENTORY['all']['children'] = ALL_GROUPS
+
+ALL_HOSTS = []
+for host_id, name in HOSTS.items():
+    ALL_HOSTS.append(name)
+INVENTORY['all']['hosts'] = ALL_HOSTS
+
 for group_id, group_name in GROUPS.items():
     hosts = []
     for host_id, name in HOSTS.items():
@@ -55,37 +68,19 @@ for group_id, group_name in GROUPS.items():
         if hostgroup_lookup is not None:
             if hostgroup_lookup == group_id:
                 hosts.append(name)
-    child_lookup = CHILDGROUPS.get(group_id)
-    if child_lookup is None:
-        group_lookup = INVENTORY.get(group_name)
-        if group_lookup is None:
-            INVENTORY[group_name] = dict()
-            INVENTORY[group_name]['children'] = dict()
-            INVENTORY[group_name]['hosts'] = hosts
-            INVENTORY[group_name]['vars'] = dict()
-            for var_group_id, var in GROUPVARS.items():
-                if var_group_id == group_id:
-                    for k, v in var.items():
-                        INVENTORY[group_name]['vars'][k] = v
-    else:
-        parent = GROUPS.get(child_lookup)
-        group_lookup = INVENTORY.get(parent)
-        if group_lookup is None:
-            INVENTORY[parent] = dict()
-            INVENTORY[parent]['children'] = dict()
-            INVENTORY[parent]['hosts'] = hosts
-            INVENTORY[parent]['vars'] = dict()
-            for var_group_id, var in GROUPVARS.items():
-                if var_group_id == group_id:
-                    for k, v in var.items():
-                        INVENTORY[parent]['vars'][k] = v
-        INVENTORY[parent]['children'][group_name] = dict()
-        INVENTORY[parent]['children'][group_name]['hosts'] = hosts
-        INVENTORY[parent]['children'][group_name]['vars'] = dict()
-        for var_group_id, var in GROUPVARS.items():
-            if var_group_id == group_id:
-                for k, v in var.items():
-                    INVENTORY[parent]['children'][group_name]['vars'][k] = v
+    children = []
+    for childid, parentid in CHILDGROUPS.items():
+        if parentid == group_id:
+            child = GROUPS.get(childid)
+            children.append(child)
+    INVENTORY[group_name] = dict()
+    INVENTORY[group_name]['children'] = children
+    INVENTORY[group_name]['hosts'] = hosts
+    INVENTORY[group_name]['vars'] = dict()
+    for var_group_id, var in GROUPVARS.items():
+        if var_group_id == group_id:
+            for k, v in var.items():
+                INVENTORY[group_name]['vars'][k] = v
 
 UNGROUPED_HOSTS = []
 for host_id, name in HOSTS.items():
