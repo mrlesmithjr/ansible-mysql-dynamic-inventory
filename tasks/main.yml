@@ -1,0 +1,22 @@
+---
+# tasks file for ansible-mysql-dynamic-inventory
+- name: Creating DB
+  mysql_db:
+    name: "{{ mysql_dynamic_inventory_db_name }}"
+    state: present
+  become: true
+
+- name: Creating DB User
+  mysql_user:
+    host: "{{ item }}"
+    name: "{{ mysql_dynamic_inventory_user }}"
+    password: "{{ mysql_dynamic_inventory_password }}"
+    priv: "{{ mysql_dynamic_inventory_db_name + '.*:ALL' }}"
+    state: present
+  become: true
+  loop:
+    - "{{ ansible_hostname }}"
+    - 127.0.0.1
+    - "::1"
+    - localhost
+    - "%"

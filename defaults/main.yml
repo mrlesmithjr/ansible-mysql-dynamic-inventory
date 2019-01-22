@@ -1,0 +1,5 @@
+---
+# defaults file for ansible-mysql-dynamic-inventory
+mysql_dynamic_inventory_db_name: ansible
+mysql_dynamic_inventory_password: ansible
+mysql_dynamic_inventory_user: ansible
