@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#!/usr/bin/env python
 
 import argparse
 import json
@@ -44,8 +44,13 @@ for row in CURSOR.fetchall():
 
 HOSTGROUPS = dict()
 CURSOR.execute('SELECT hostid, groupid FROM hostgroups;')
-for row in CURSOR.fetchall():
-    HOSTGROUPS[row[0]] = row[1]
+_HOSTGROUPS = CURSOR.fetchall()
+for host_id, name in HOSTS.items():
+    hostgroups = []
+    for row in _HOSTGROUPS:
+        if row[0] == host_id:
+            hostgroups.append(row[1])
+    HOSTGROUPS[host_id] = hostgroups
 
 INVENTORY = dict()
 INVENTORY['all'] = dict()
@@ -65,9 +70,8 @@ for group_id, group_name in GROUPS.items():
     hosts = []
     for host_id, name in HOSTS.items():
         hostgroup_lookup = HOSTGROUPS.get(host_id)
-        if hostgroup_lookup is not None:
-            if hostgroup_lookup == group_id:
-                hosts.append(name)
+        if group_id in hostgroup_lookup:
+            hosts.append(name)
     children = []
     for childid, parentid in CHILDGROUPS.items():
         if parentid == group_id:

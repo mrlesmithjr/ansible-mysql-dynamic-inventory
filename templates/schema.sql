@@ -44,7 +44,7 @@ CREATE TABLE hostgroups (
     FOREIGN KEY (hostid) REFERENCES hosts(id) ON DELETE CASCADE,
     FOREIGN KEY (groupid) REFERENCES groups(id) ON DELETE CASCADE,
     PRIMARY KEY (id),
-    UNIQUE (hostid)
+    UNIQUE (hostid, groupid)
 ) ENGINE=InnoDB;
 
 DROP TABLE IF EXISTS hostvars;
