@@ -1,11 +1,11 @@
 ---
-- name: Creating DB
+- name: db_setup | Creating DB
   mysql_db:
     name: "{{ mysql_dynamic_inventory_db_name }}"
     state: present
   become: true
 
-- name: Creating DB User
+- name: db_setup | Creating DB User
   mysql_user:
     host: "{{ item }}"
     name: "{{ mysql_dynamic_inventory_user }}"
@@ -19,3 +19,25 @@
     - "::1"
     - localhost
     - "%"
+
+- name: db_setup | Checking If Schema Has Been Imported
+  command: >
+    mysql -u {{ mysql_dynamic_inventory_user }}
+    --password={{ mysql_dynamic_inventory_password }}
+    -e "show tables from {{ mysql_dynamic_inventory_db_name }}"
+  register: _dynamic_inventory_schema
+  changed_when: false
+
+- name: db_setup | Generating Schema
+  template:
+    src: schema.sql.j2
+    dest: /tmp/schema.sql
+  when: _dynamic_inventory_schema['stdout_lines'] == []
+
+- name: db_setup | Importing Schema
+  mysql_db:
+    name: "{{ mysql_dynamic_inventory_db_name }}"
+    state: import
+    target: /tmp/schema.sql
+  become: true
+  when: _dynamic_inventory_schema['stdout_lines'] == []
