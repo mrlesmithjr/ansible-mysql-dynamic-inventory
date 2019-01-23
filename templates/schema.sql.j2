@@ -2,6 +2,8 @@ DROP TABLE IF EXISTS groups;
 CREATE TABLE groups (
     id INT NOT NULL AUTO_INCREMENT,
     name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE now(),
     PRIMARY KEY (id),
     UNIQUE (name)
 ) ENGINE=InnoDB;
@@ -11,6 +13,8 @@ CREATE TABLE childgroups (
     id INT NOT NULL AUTO_INCREMENT,
     parentid INT NOT NULL,
     childid INT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE now(),
     FOREIGN KEY (parentid) REFERENCES groups(id) ON DELETE CASCADE,
     FOREIGN KEY (childid) REFERENCES groups(id) ON DELETE CASCADE,
     PRIMARY KEY (id),
@@ -23,6 +27,8 @@ CREATE TABLE groupvars (
     name VARCHAR(255) NOT NULL,
     value VARCHAR(255) NOT NULL,
     groupid INT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE now(),
     FOREIGN KEY (groupid) REFERENCES groups(id) ON DELETE CASCADE,
     PRIMARY KEY (id),
     UNIQUE (name, groupid)
@@ -32,6 +38,8 @@ DROP TABLE IF EXISTS hosts;
 CREATE TABLE hosts (
     id INT NOT NULL AUTO_INCREMENT,
     name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE now(),
     PRIMARY KEY (id),
     UNIQUE (name)
 ) ENGINE=InnoDB;
@@ -41,6 +49,8 @@ CREATE TABLE hostgroups (
     id INT NOT NULL AUTO_INCREMENT,
     hostid INT NOT NULL,
     groupid INT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE now(),
     FOREIGN KEY (hostid) REFERENCES hosts(id) ON DELETE CASCADE,
     FOREIGN KEY (groupid) REFERENCES groups(id) ON DELETE CASCADE,
     PRIMARY KEY (id),
@@ -53,6 +63,8 @@ CREATE TABLE hostvars (
     name VARCHAR(255) NOT NULL,
     value VARCHAR(255) NOT NULL,
     hostid INT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE now(),
     FOREIGN KEY (hostid) REFERENCES hosts(id) ON DELETE CASCADE,
     PRIMARY KEY (id),
     UNIQUE (name, hostid)
