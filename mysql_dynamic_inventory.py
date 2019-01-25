@@ -17,7 +17,7 @@ try:
         database='ansible')
     CURSOR = CONNECTION.cursor()
 except Error as e:
-    print "Error while connecting to MySQL", e
+    print("Error while connecting to MySQL", e)
 
 GROUPS = dict()
 CURSOR.execute('SELECT id, name FROM groups;')
@@ -105,4 +105,4 @@ for row in CURSOR.fetchall():
         INVENTORY['_meta']['hostvars'][host] = dict()
     INVENTORY['_meta']['hostvars'][host][row[1]] = row[2]
 
-print json.dumps(INVENTORY, indent=4)
+print(json.dumps(INVENTORY, indent=4))
