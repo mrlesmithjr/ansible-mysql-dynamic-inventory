@@ -1,71 +1,75 @@
 DROP TABLE IF EXISTS groups;
-CREATE TABLE groups (
-    id INT NOT NULL AUTO_INCREMENT,
-    name VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE now(),
-    PRIMARY KEY (id),
-    UNIQUE (name)
-) ENGINE=InnoDB;
+CREATE TABLE `groups` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS childgroups;
-CREATE TABLE childgroups (
-    id INT NOT NULL AUTO_INCREMENT,
-    parentid INT NOT NULL,
-    childid INT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE now(),
-    FOREIGN KEY (parentid) REFERENCES groups(id) ON DELETE CASCADE,
-    FOREIGN KEY (childid) REFERENCES groups(id) ON DELETE CASCADE,
-    PRIMARY KEY (id),
-    UNIQUE (parentid, childid)
-) ENGINE=InnoDB;
+CREATE TABLE `childgroups` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `parentid` int(11) NOT NULL,
+  `childid` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `parentid` (`parentid`,`childid`),
+  KEY `childid` (`childid`),
+  CONSTRAINT `childgroups_ibfk_1` FOREIGN KEY (`parentid`) REFERENCES `groups` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `childgroups_ibfk_2` FOREIGN KEY (`childid`) REFERENCES `groups` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS groupvars;
-CREATE TABLE groupvars (
-    id INT NOT NULL AUTO_INCREMENT,
-    name VARCHAR(255) NOT NULL,
-    value VARCHAR(255) NOT NULL,
-    groupid INT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE now(),
-    FOREIGN KEY (groupid) REFERENCES groups(id) ON DELETE CASCADE,
-    PRIMARY KEY (id),
-    UNIQUE (name, groupid)
-) ENGINE=InnoDB;
+CREATE TABLE `groupvars` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `value` varchar(255) NOT NULL,
+  `groupid` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`,`groupid`),
+  KEY `groupid` (`groupid`),
+  CONSTRAINT `groupvars_ibfk_1` FOREIGN KEY (`groupid`) REFERENCES `groups` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS hosts;
-CREATE TABLE hosts (
-    id INT NOT NULL AUTO_INCREMENT,
-    name VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE now(),
-    PRIMARY KEY (id),
-    UNIQUE (name)
-) ENGINE=InnoDB;
+CREATE TABLE `hosts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS hostgroups;
-CREATE TABLE hostgroups (
-    id INT NOT NULL AUTO_INCREMENT,
-    hostid INT NOT NULL,
-    groupid INT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE now(),
-    FOREIGN KEY (hostid) REFERENCES hosts(id) ON DELETE CASCADE,
-    FOREIGN KEY (groupid) REFERENCES groups(id) ON DELETE CASCADE,
-    PRIMARY KEY (id),
-    UNIQUE (hostid, groupid)
-) ENGINE=InnoDB;
+CREATE TABLE `hostgroups` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `hostid` int(11) NOT NULL,
+  `groupid` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `hostid` (`hostid`,`groupid`),
+  KEY `groupid` (`groupid`),
+  CONSTRAINT `hostgroups_ibfk_1` FOREIGN KEY (`hostid`) REFERENCES `hosts` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `hostgroups_ibfk_2` FOREIGN KEY (`groupid`) REFERENCES `groups` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS hostvars;
-CREATE TABLE hostvars (
-    id INT NOT NULL AUTO_INCREMENT,
-    name VARCHAR(255) NOT NULL,
-    value VARCHAR(255) NOT NULL,
-    hostid INT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE now(),
-    FOREIGN KEY (hostid) REFERENCES hosts(id) ON DELETE CASCADE,
-    PRIMARY KEY (id),
-    UNIQUE (name, hostid)
-) ENGINE=InnoDB;
+CREATE TABLE `hostvars` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `value` varchar(255) NOT NULL,
+  `hostid` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`,`hostid`),
+  KEY `hostid` (`hostid`),
+  CONSTRAINT `hostvars_ibfk_1` FOREIGN KEY (`hostid`) REFERENCES `hosts` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

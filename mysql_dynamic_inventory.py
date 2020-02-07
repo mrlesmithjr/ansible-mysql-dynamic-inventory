@@ -6,7 +6,7 @@ import mysql.connector
 from mysql.connector import Error
 
 PARSER = argparse.ArgumentParser()
-PARSER.add_argument('--dbhost', default='192.168.250.10')
+PARSER.add_argument('--dbhost', default='172.16.24.197')
 PARSER.add_argument('--list', default=False, action='store_true')
 PARSER.add_argument('--host', default=None)
 ARGS = PARSER.parse_args()

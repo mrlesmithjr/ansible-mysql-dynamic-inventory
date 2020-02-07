@@ -1,7 +1,81 @@
 ---
-- hosts:
-    all
-    # - hosts: localhost
-#   remote_user: root
-#   roles:
-#     - ansible-mysql-dynamic-inventory
+- hosts: all
+  tasks:
+    - name: Update APT Cache
+      apt:
+        update_cache: true
+      become: true
+      register: result
+      until: result is successful
+      when: ansible_os_family == "Debian"
+
+    - name: Update YUM Cache
+      yum:
+        update_cache: true
+      become: true
+      register: result
+      until: result is successful
+      when: ansible_os_family == "RedHat"
+
+- hosts: db_servers
+  tasks:
+    - name: Installing mariadb-server
+      apt:
+        name: mariadb-server
+        state: present
+      become: true
+      register: result
+      until: result is successful
+      when: ansible_os_family == "Debian"
+
+    - name: Installing mariadb-server
+      yum:
+        name: mariadb-server
+        state: present
+      become: true
+      register: result
+      until: result is successful
+      when: ansible_os_family == "RedHat"
+
+    - name: Ensuring mysql Service Is Enabled and Started
+      service:
+        name: mysql
+        state: started
+        enabled: true
+      become: true
+      when: ansible_os_family == "Debian"
+
+    - name: Ensuring mariadb Service Is Enabled and Started
+      service:
+        name: mariadb
+        state: started
+        enabled: true
+      become: true
+      when: ansible_os_family == "RedHat"
+
+- hosts: web_servers
+  tasks:
+    - name: Installing NGINX
+      apt:
+        name: nginx
+        state: present
+      become: true
+      register: result
+      until: result is successful
+      when: ansible_os_family == "Debian"
+
+    - name: Installing NGINX
+      yum:
+        name: nginx
+        state: present
+      become: true
+      register: result
+      until: result is successful
+      when: ansible_os_family == "RedHat"
+
+    - name: Ensuring NGINX Is Enabled and Started
+      service:
+        name: nginx
+        state: started
+        enabled: true
+      become: true
