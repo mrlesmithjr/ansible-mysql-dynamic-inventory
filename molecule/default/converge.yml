@@ -1,0 +1,18 @@
+---
+- name: Converge
+  hosts: all
+  vars:
+    mysql_allow_remote_connections: true
+    mysql_config: true
+  tasks:
+    - name: Include ansible-bootstrap-python
+      include_role:
+        name: ansible-bootstrap-python
+
+    - name: Include ansible-mysql
+      include_role:
+        name: ansible-mysql
+
+    - name: Include ansible-mysql-dynamic-inventory
+      include_role:
+        name: ansible-mysql-dynamic-inventory
