@@ -33,7 +33,7 @@ def main_menu(args, cursor):
         print('\n{0}:'.format(menu_title))
         for item in menu_sorted:
             print('{0}. {1}'.format(item[0], item[1]))
-        option_id = raw_input('\nOption ID: ')
+        option_id = input('\nOption ID: ')
         response = menu_options.get(option_id)
         if response is not None:
             if option_id == '01':
@@ -42,7 +42,7 @@ def main_menu(args, cursor):
                 break
         else:
             print('Please choose a valid option.')
-            raw_input('Press Enter to try again: ')
+            input('Press Enter to try again: ')
 
 
 def connect(args):
@@ -55,7 +55,7 @@ def connect(args):
         print("Error while connecting to MySQL", e)
 
 
-def get_hosts(args, cursor):
+def get_hosts(_args, cursor):
     hosts = dict()
     cursor.execute("SELECT id, name FROM hosts;")
     for row in cursor.fetchall():
@@ -70,7 +70,7 @@ def get_hosts(args, cursor):
         for hostvar in host_vars:
             hosts[name]['hostvars'][hostvar[0]] = hostvar[1]
     print(json.dumps(hosts, indent=4))
-    raw_input('Press Enter: ')
+    input('Press Enter: ')
 
 
 if __name__ == '__main__':
