@@ -1,5 +1,9 @@
 #!/usr/bin/env python
+"""[summary]
 
+Returns:
+    [type]: [description]
+"""
 
 import argparse
 import operator
@@ -10,6 +14,7 @@ from mysql.connector import Error
 
 
 def main():
+    """[summary]"""
     args = get_args()
     connection = connect(args)
     cursor = connection.cursor()
@@ -17,61 +22,86 @@ def main():
 
 
 def get_args():
+    """[summary]
+
+    Returns:
+        [type]: [description]
+    """
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dbhost', default='192.168.250.10')
+    parser.add_argument("--dbhost", default="192.168.250.10")
     args = parser.parse_args()
     return args
 
 
 def main_menu(args, cursor):
+    """[summary]
+
+    Args:
+        args ([type]): [description]
+        cursor ([type]): [description]
+    """
     while True:
-        os.system('clear')
-        menu_options = {'01': 'Get Hosts',
-                        '99': 'Exit'}
+        os.system("clear")  # nosec B607
+        menu_options = {"01": "Get Hosts", "99": "Exit"}
         menu_sorted = sorted(menu_options.items(), key=operator.itemgetter(0))
-        menu_title = 'Main Menu'
-        print('\n{0}:'.format(menu_title))
+        menu_title = "Main Menu"
+        print(f"\n{menu_title}:")
         for item in menu_sorted:
-            print('{0}. {1}'.format(item[0], item[1]))
-        option_id = input('\nOption ID: ')
+            print(f"{item[0]}. {item[1]}")
+        option_id = input("\nOption ID: ")
         response = menu_options.get(option_id)
         if response is not None:
-            if option_id == '01':
+            if option_id == "01":
                 get_hosts(args, cursor)
-            elif option_id == '99':
+            elif option_id == "99":
                 break
         else:
-            print('Please choose a valid option.')
-            input('Press Enter to try again: ')
+            print("Please choose a valid option.")
+            input("Press Enter to try again: ")
 
 
 def connect(args):
-    try:
+    """[summary]
+
+    Args:
+        args ([type]): [description]
+
+    Returns:
+        [type]: [description]
+    """
+    try:  # nosecB106
         connection = mysql.connector.connect(
-            host=args.dbhost, user='ansible', passwd='ansible',
-            database='ansible')
+            host=args.dbhost, user="ansible", passwd="ansible", database="ansible"
+        )
         return connection
-    except Error as e:
+    except Error as e:  # pylint: disable=invalid-name
         print("Error while connecting to MySQL", e)
 
 
 def get_hosts(_args, cursor):
+    """[summary]
+
+    Args:
+        _args ([type]): [description]
+        cursor ([type]): [description]
+    """
     hosts = dict()
     cursor.execute("SELECT id, name FROM hosts;")
     for row in cursor.fetchall():
         host_id = row[0]
         name = row[1]
+
         cursor.execute(
-            "SELECT name, value FROM hostvars WHERE hostid='{0}'".format(
-                host_id))
+            f"SELECT name, value FROM hostvars WHERE hostid='{host_id}'"  # nosec B608
+        )
         host_vars = cursor.fetchall()
         hosts[name] = dict()
-        hosts[name]['hostvars'] = dict()
+        hosts[name]["hostvars"] = dict()
         for hostvar in host_vars:
-            hosts[name]['hostvars'][hostvar[0]] = hostvar[1]
+            hosts[name]["hostvars"][hostvar[0]] = hostvar[1]
     print(json.dumps(hosts, indent=4))
-    input('Press Enter: ')
+    input("Press Enter: ")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

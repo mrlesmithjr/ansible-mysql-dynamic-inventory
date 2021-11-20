@@ -32,6 +32,7 @@
   template:
     src: schema.sql.j2
     dest: /tmp/schema.sql
+    mode: u=rw,g=r,o=r
   when: _dynamic_inventory_schema['stdout_lines'] == []
 
 - name: db_setup | Importing Schema

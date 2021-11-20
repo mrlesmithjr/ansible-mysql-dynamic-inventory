@@ -1,8 +1,14 @@
 # Python requirements for development
 -c requirements.txt
+ansible-lint
 autopep8
+docker
 flake8
 mkdocs
+mkdocs
+molecule
+pip-tools
 pycodestyle
 pylint
 tox
+yamllint
